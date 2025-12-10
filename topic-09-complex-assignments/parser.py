@@ -814,6 +814,8 @@ def parse_assignment_expression(tokens):
     assignment_expression = [ "extern" ] logical_expression [ "=" assignment_expression ]
     """
     extern = False
+    start_token = tokens[0]  # Capture starting token for line info
+    
     if tokens[0]["tag"] == "extern":
         extern = True 
         tokens = tokens[1:]       
@@ -830,7 +832,11 @@ def parse_assignment_expression(tokens):
                 raise SyntaxError("extern can only be used with simple identifiers")
             left["extern"] = True
 
-        return {"tag": "assign", "target": left, "value": right}, tokens
+        # Preserve line number from the original token
+        assign_ast = {"tag": "assign", "target": left, "value": right}
+        if "line" in start_token:
+            assign_ast["line"] = start_token["line"]
+        return assign_ast, tokens
 
     # if no assignment occurred, extern must not be present
     assert not extern, "Can't use extern without assignment."

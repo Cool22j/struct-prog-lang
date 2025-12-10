@@ -160,7 +160,13 @@ def evaluate_builtin_function(function_name, args):
 
     assert False, f"Unknown builtin function '{function_name}'"
 
-def evaluate(ast, environment):
+def evaluate(ast, environment, watch_var=None, filename=None):
+    # Store watch_var in environment for access during recursive calls
+    if watch_var is not None and "$watch_var" not in environment:
+        environment["$watch_var"] = watch_var
+    if filename is not None and "$filename" not in environment:
+        environment["$filename"] = filename
+    
     if ast["tag"] == "number":
         assert type(ast["value"]) in [
             float,
@@ -523,6 +529,14 @@ def evaluate(ast, environment):
         if value_status == "exit": return value, "exit"
 
         target_base[target_index] = value
+        
+        # Check if we're watching this variable
+        watch_var = environment.get("$watch_var")
+        if watch_var is not None and target["tag"] == "identifier" and target["value"] == watch_var:
+            # Print watch information with line number if available
+            line_num = ast.get("line", "?")
+            print(f"[WATCH] {watch_var} = {value} (line {line_num})")
+        
         return value, None
 
     if ast["tag"] == "return":

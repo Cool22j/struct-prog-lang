@@ -10,16 +10,25 @@ from evaluator import evaluate
 
 def main():
     environment = {}
+    watch_var = None
+    source_file = None
+    
+    # Parse command line arguments
+    for arg in sys.argv[1:]:
+        if arg.startswith("watch="):
+            watch_var = arg.split("=", 1)[1]
+        else:
+            source_file = arg
     
     # Check for command line arguments
-    if len(sys.argv) > 1:
+    if source_file:
         # Filename provided, read and execute it
-        with open(sys.argv[1], 'r') as f:
+        with open(source_file, 'r') as f:
             source_code = f.read()
         try:
             tokens = tokenize(source_code)
             ast = parse(tokens)
-            final_value, exit_status = evaluate(ast, environment)
+            final_value, exit_status = evaluate(ast, environment, watch_var=watch_var, filename=source_file)
             if exit_status == "exit":
                 # print(f"Exiting with code: {final_value}") # Optional debug print
                 sys.exit(final_value if isinstance(final_value, int) else 0)

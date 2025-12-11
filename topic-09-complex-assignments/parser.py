@@ -1286,6 +1286,17 @@ def parse_statement(tokens):
     statement = if_statement | while_statement | function_statement | return_statement | print_statement | exit_statement | import_statement | break_statement | continue_statement | assert_statement | expression
     """
     tag = tokens[0]["tag"]
+    
+    # Check for "maybe" before if statements
+    if tag == "maybe":
+        if len(tokens) > 1 and tokens[1]["tag"] == "if":
+            tokens = tokens[1:]  
+            if_statement, tokens = parse_if_statement(tokens)
+            if_statement["maybe"] = True  
+            return if_statement, tokens
+        else:
+            raise SyntaxError("'maybe' can only be used before 'if' statements")
+    
     # note: none of these consumes a token
     if tag == "if":
         return parse_if_statement(tokens)

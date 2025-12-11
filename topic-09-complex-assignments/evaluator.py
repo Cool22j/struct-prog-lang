@@ -2,6 +2,7 @@ from tokenizer import tokenize
 from parser import parse
 from pprint import pprint
 import copy
+import random
 
 def type_of(*args):
     def single_type(x):
@@ -371,7 +372,13 @@ def evaluate(ast, environment, watch_var=None, filename=None):
         condition_value, cond_status = evaluate(ast["condition"], environment)
         if cond_status == "exit": return condition_value, "exit"
 
-        if is_truthy(condition_value):
+        # Check if this is a "maybe" if statement
+        should_execute = is_truthy(condition_value)
+        if ast.get("maybe", False):
+            # Probabilistically skip the if statement (50% chance)
+            should_execute = should_execute and random.random() < 0.5
+        
+        if should_execute:
             val, status = evaluate(ast["then"], environment)
             if status: # Propagate "return", "exit", "break", "continue"
                 return val, status

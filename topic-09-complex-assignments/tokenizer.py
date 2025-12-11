@@ -23,6 +23,7 @@ patterns = [
     [r"or", "||"],  # alternate for ||
     [r"not", "!"],  # alternate for !
     [r"assert", "assert"],
+    [r"maybe", "maybe"],  # maybe keyword for probabilistic if statements
     [r"[a-zA-Z_][a-zA-Z0-9_]*", "identifier"],  # identifiers
     [r"\+", "+"],
     [r"\-", "-"],
